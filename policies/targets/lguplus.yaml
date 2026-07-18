@@ -1,0 +1,124 @@
+name: LG U+ (LG유플러스 주식회사)
+policy_version: "1.0"
+source_urls:
+  - https://privacy.lguplus.com/privacy/cvdvdp/v1
+retrieved_at: "2026-07-18"
+content_hash: unknown  # capture a hash of the saved page text on next verification pass
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true   # "한국인터넷진흥원이 제공하는 VPN을 통해서만 서비스 취약점 발굴 행위를 허용"
+  nationality_requirement: "South Korean nationals only, age 19+ as of program application date"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []   # none stated in this VDP
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - www.lguplus.com          # 웹 대표홈페이지
+    - m.lguplus.com             # 모바일 대표홈페이지
+    - privacy.lguplus.com       # 프라이버시 센터
+    - account.lguplus.com       # 로그인
+    - chatbot.lguplus.com       # 챗봇
+    - mglobal.lguplus.com       # 글로벌 홈페이지
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps:
+    - "Set-top box: UHD4T, firmware v03.02.0267 or later"
+    - "Set-top box: UHD4K, firmware v02.02.0160 or later"
+    - "Android app: U+one, v7.0.23 or later"
+    - "iOS app: U+one, v4.0.26 or later"
+  explicit_out_of_scope:
+    - "Any domain not in the 6 listed above — VDP states testing outside listed domains is prohibited"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: unknown
+  scanner_allowed: false   # excluded finding #18: "무차별 대입 / 퍼징 / 자동 스캔 툴을 사용한 공격"
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "Manual testing only. Brute force/fuzzing/automated scanning explicitly listed as a ground for finding exclusion."
+
+accounts:
+  test_account_required: true
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: "FAQ: register the test account using researcher's own real identity ('본인 정보를 사용하셔서 회원가입 후 진행'). Any post/comment/inquiry created during testing must include the tag '[정보보안점검팀] 보안점검 중입니다.' in both title and body."
+
+prohibited:
+  dos: true
+  brute_force: true
+  credential_stuffing: true
+  social_engineering: true
+  physical_attack: true
+  third_party_testing: true
+  personal_data_access: true   # must stop immediately + notify company; mask any unavoidable screenshot; delete after reporting
+  destructive_actions: true
+  persistence: true
+  mass_content_creation: true   # excluded finding #12
+  malware: true
+  other:
+    - "No demanding monetary reward except via a separately operated bug-bounty program"
+    - "No reporting to any third party other than LG U+ / KISA"
+    - "No reverse-engineering the in-scope apps/firmware beyond what's needed for the vulnerability search"
+    - "Must obtain LG U+'s approval before resuming testing after a stop caused by personal-data exposure"
+
+excluded_findings:
+  - "Vulnerability does not reproduce"
+  - "Requires excessive or extreme user interaction"
+  - "Requires disabling a security feature to trigger"
+  - "Reported as a mere possibility without concrete proof"
+  - "Duplicate of an already-reported vulnerability"
+  - "Reflected XSS"
+  - "Self-only impact vulnerabilities"
+  - "Already publicly known vulnerabilities"
+  - "Open redirect (URL redirection)"
+  - "Mobile deep-link vulnerabilities"
+  - "Denial of Service attacks"
+  - "Mass repeated post/comment/message creation vulnerabilities"
+  - "Attacks requiring physical access to another person's device"
+  - "Vulnerabilities only on rooted/jailbroken devices"
+  - "Vulnerabilities only on browsers/platforms past end-of-support"
+  - "Missing security-related HTTP headers"
+  - "SSL/TLS cipher suite or protocol version issues"
+  - "Brute force / fuzzing / automated scanning tool attacks"
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr) — register if not already a member. Company contact for VDP matters: bugbounty@lguplus.co.kr. KISA operational support: cvd@kisa.or.kr / 02-405-6697."
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Service/product name where found"
+    - "Discovery date/time"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Network intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120   # +60 day extension possible by mutual agreement, with stated reason
+  disclosure_requires_approval: true   # disclosure location is KISA (https://knvd.krcert.or.kr); researcher may appear named or anonymous if desired
+
+privacy:
+  stop_on_personal_data: true
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: "Where VDP and the personal-data-processing-delegation contract conflict: contract governs privacy matters, VDP governs everything else."
+
+uncertainties:
+  - "No explicit request-rate/concurrency limit published — treat as manual-pace only."
+  - "Whether personal accounts opened for testing may be reused across multiple test sessions or must be single-use is not stated."
+
+evidence:
+  field_sources:
+    scope: "https://privacy.lguplus.com/privacy/cvdvdp/v1 section 2, rendered page text captured 2026-07-18 via browser (page is a JS SPA; plain HTTP fetch does not return body content)"
+    schedule: "same source, section 0 (intro) and section 3"
+    excluded_findings: "same source, section 5 (items 1-18)"
+    reporting: "same source, sections 4 and 6"
+    privacy: "same source, section 7 item 3 and section 8 item 3"

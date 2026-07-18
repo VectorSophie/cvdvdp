@@ -1,0 +1,106 @@
+name: EST Security (이스트시큐리티)
+policy_version: "1.1"
+source_urls:
+  - https://www.estsecurity.com/public/vdp
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true
+  nationality_requirement: "South Korean nationals only, age 19+"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains: []   # NOT a web-asset target — see allowed_apps
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps:
+    - "Alyac (알약) desktop antivirus application, version 2.5, Windows 11 only"
+    - "Alyac (알약) desktop antivirus application, version 3.0, Windows 11 only"
+  explicit_out_of_scope:
+    - "Alyac's associated backend infrastructure/network/third-party services"
+    - "Alyac MOBILE app (explicitly out of scope — only the desktop app is in scope)"
+    - "Any Alyac version other than 2.5 or 3.0"
+    - "Any OS other than Windows 11"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false   # not applicable — no web scope
+  scanner_allowed: false
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "This target is a desktop software product, not a web/API asset. Testing means analyzing the installed Windows application itself (v2.5/3.0 on Windows 11), not network requests to a domain. Scope Guard logic built for domain/URL matching does not apply here — needs an install-and-analyze workflow instead."
+
+accounts:
+  test_account_required: unknown
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true
+  brute_force: unknown
+  credential_stuffing: unknown
+  social_engineering: true
+  physical_attack: true
+  third_party_testing: true   # mobile app and backend infra explicitly excluded
+  personal_data_access: true
+  destructive_actions: true
+  persistence: true
+  mass_content_creation: unknown   # not applicable to a desktop AV product
+  malware: true
+  other:
+    - "No reverse-engineering the product for purposes beyond the vulnerability search"
+    - "No reporting to any third party other than the company/KISA"
+
+excluded_findings:
+  - "Non-reproducible findings"
+  - "Requires excessive user interaction"
+  - "Requires disabled security features"
+  - "No concrete proof provided"
+  - "Duplicates"
+  - "DoS"
+  - "Low-risk bucket: rate-limiting, legacy library disclosure, admin-page exposure alone, debug-info leakage"
+  # note: this is boilerplate shared with Toss Payments' policy template — largely inapplicable to a desktop AV product (no rate limiting, no admin pages); verify against the live page whether a product-specific exclusion list exists separately
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr) or escvdvdpinfo@estsecurity.com"
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Name / phone / email"
+    - "Product name and version"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120
+  disclosure_requires_approval: true
+
+privacy:
+  stop_on_personal_data: true
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true
+
+uncertainties:
+  - "Excluded-findings list captured is near-identical boilerplate to Toss Payments' — re-verify the live page for any Alyac-specific exclusions (e.g. AV-engine-detection bypass, false-positive/negative reporting rules) that a generic template might not capture."
+  - "No installer URL or version-verification method was captured for Alyac 2.5/3.0 — get the exact download/version confirmation steps directly from the company before starting, since testing the wrong version could invalidate a finding."
+  - "brute_force/credential_stuffing not applicable in the usual web sense for a desktop AV product; local-privilege / self-protection-bypass equivalents may apply instead — treat cautiously and confirm scope interpretation before testing anything resembling privilege escalation against the AV's self-defense mechanisms."
+
+evidence:
+  field_sources:
+    scope: "https://www.estsecurity.com/public/vdp v1.1 dated 2026-06-26 (research fork, accessed 2026-07-18)"
+    reporting: "same source + https://hacker.findthegap.co.kr"

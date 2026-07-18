@@ -1,0 +1,110 @@
+name: Toss Payments (토스페이먼츠)
+policy_version: "1.1"
+source_urls:
+  - https://pages.tosspayments.com/terms/homepage/vulnerability-disclosure
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true
+  nationality_requirement: "South Korean nationals only, age 19+"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []   # none stated
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - www.tosspayments.com
+    - developers.tosspayments.com
+  allowed_urls:
+    - "homepage-api-gateway.tosspayments.com/developers-centre/*"
+    - "homepage-api-gateway.tosspayments.com/webhook/v1/*"
+    - "homepage-api-gateway.tosspayments.com/merchants/v1/*"
+    - "homepage-api-gateway.tosspayments.com/merchants/v2/*"
+    - "homepage-api-gateway.tosspayments.com/payments/v4/*"
+    - "homepage-api-gateway.tosspayments.com/payment-widget/v1/*"
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope:
+    - "Everything not explicitly listed above, stated explicitly in the policy"
+    - "Any homepage-api-gateway path/version not in the 6 listed above (e.g. do not assume payments/v3 or merchants/v3 are in scope)"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false
+  scanner_allowed: false   # no explicit scanner permission granted; treat as not permitted per program default
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "KISA VPN only; no automation permission stated anywhere in this policy. This is a PAYMENTS company — treat any transaction/payment-flow testing as maximally sensitive; no real financial transactions, no real card/bank data, researcher-controlled test data only."
+
+accounts:
+  test_account_required: unknown
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true
+  brute_force: unknown   # not explicitly named as a prohibited technique in what was captured; treat as prohibited per program-level default until independently confirmed
+  credential_stuffing: unknown   # same caveat
+  social_engineering: true   # "피싱" explicitly named
+  physical_attack: true
+  third_party_testing: true
+  personal_data_access: true   # must stop immediately on PII/credit-info/trade-secret access
+  destructive_actions: true   # "데이터 파괴/훼손/위조" prohibited
+  persistence: true
+  mass_content_creation: unknown
+  malware: true
+  other:
+    - "No out-of-scope reverse engineering"
+    - "This is a PAYMENTS provider — no unauthorized payment testing of any kind (aligns with this project's own non-negotiable ban on unauthorized payment testing); any payment-flow test must use researcher-controlled test/sandbox data only, never real transactions"
+
+excluded_findings:
+  - "Non-reproducible findings"
+  - "Requires excessive user interaction"
+  - "Requires disabled security features"
+  - "No concrete proof provided"
+  - "Duplicates"
+  - "DoS"
+  - "Low-risk bucket: rate-limiting issues, legacy library disclosure, admin-page exposure alone, debug-info leakage"
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr) or security.team@tosspayments.com"
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Name / phone / email"
+    - "Service name"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120
+  disclosure_requires_approval: true
+
+privacy:
+  stop_on_personal_data: true   # explicitly extends to PII, credit/financial information, and trade secrets — appropriate given this is a payments company
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true
+
+uncertainties:
+  - "brute_force and credential_stuffing prohibition not independently confirmed as explicitly named in this specific policy text (vs. the general DoS/social-engineering/physical/malware/destruction list that WAS confirmed) — re-verify directly before assuming either is or isn't separately called out, though both remain banned under this project's own non-negotiable safety principles regardless of what any VDP says."
+  - "No explicit request-rate/concurrency limit published."
+  - "Exact scope of 'homepage-api-gateway' paths should be re-verified against the live page before testing — API gateway scope is unusually granular (specific path + version) and easy to misread."
+
+evidence:
+  field_sources:
+    scope: "https://pages.tosspayments.com/terms/homepage/vulnerability-disclosure v1.1 dated 2026-06-26 (research fork, accessed 2026-07-18)"
+    reporting: "same source + https://hacker.findthegap.co.kr"
+    privacy: "same source — stop-immediately clause covering PII/credit-info/trade-secrets"

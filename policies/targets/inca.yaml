@@ -1,0 +1,109 @@
+name: INCA Internet / nProtect (인카인터넷)
+policy_version: "1.1"
+source_urls:
+  - https://nprotect.com/kr/vdp/vdp.html
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true
+  nationality_requirement: "South Korean nationals only, age 19+"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - "bwtd.nprotect2.net/*"
+    - "supdated.nprotect.net/*"
+    - "nsrs.nprotect.net/*"
+    - "cclean.nprotect.net/*"
+    - "nosoriginv.nprotect.net"   # management console
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps:
+    - "nProtect Online Security v1.0, Windows 11 only — must be installed via the company-provided installer URL, and its security feature must be activated via a specific test-activation URL BEFORE testing begins"
+  explicit_out_of_scope:
+    - "Any domain not in the list above"
+    - "Any product/version other than nProtect Online Security v1.0 on Windows 11"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false
+  scanner_allowed: false
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "Mixed scope: 5 specific domains/console PLUS a Windows desktop security product that requires a specific pre-test setup (install via provided installer URL, then activate via a provided activation URL) before any testing may begin. Do not test the product before completing that setup step."
+
+accounts:
+  test_account_required: unknown
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true
+  brute_force: unknown
+  credential_stuffing: unknown
+  social_engineering: true
+  physical_attack: true
+  third_party_testing: true
+  personal_data_access: true
+  destructive_actions: true
+  persistence: true
+  mass_content_creation: unknown
+  malware: true
+  other:
+    - "No reverse-engineering outside the allowed scope"
+    - "No reporting to any third party other than the company/KISA"
+    - "No monetary demands outside a formally operated bug-bounty program"
+
+excluded_findings:
+  - "Non-reproducible findings"
+  - "Requires excessive user interaction"
+  - "Requires disabled security features"
+  - "No concrete proof provided"
+  - "Duplicates"
+  - "DoS"
+  - "Low-risk bucket: rate-limiting, legacy library disclosure, admin-page exposure alone, debug-info leakage"
+  # same shared program template as Toss Payments/EST Security — re-verify for any nProtect-specific exclusions on the live page
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr) or vuln@inca.co.kr"
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Name / phone / email"
+    - "Service/product name"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120
+  disclosure_requires_approval: true
+
+privacy:
+  stop_on_personal_data: true
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true
+
+uncertainties:
+  - "Exact installer URL and activation-URL for nProtect Online Security v1.0 were not captured verbatim in this pass — obtain the exact links from the live page or company contact before starting; testing an improperly-activated install could produce invalid results."
+  - "A prior WebSearch AI-summary incorrectly attributed EST Security's Alyac 2.5/3.0 scope to INCA — that was verified WRONG by fetching nprotect.com directly. This file reflects the corrected, source-verified scope. Do not reintroduce the Alyac confusion."
+  - "brute_force/credential_stuffing not independently named for this target; still banned under this project's own non-negotiable principles regardless."
+
+evidence:
+  field_sources:
+    scope: "https://nprotect.com/kr/vdp/vdp.html v1.1 dated 2026-06-26, fetched directly via curl -k (broken cert chain on this public marketing page, no target interaction involved) — research fork, accessed 2026-07-18"
+    reporting: "same source + https://hacker.findthegap.co.kr"

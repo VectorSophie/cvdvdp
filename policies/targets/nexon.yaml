@@ -1,0 +1,135 @@
+name: Nexon (넥슨코리아)
+policy_version: unknown   # version number not captured; re-check page for a document-history section
+source_urls:
+  - https://cs.nexon.com/helpBoard/popuphelpview/33900
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true
+  nationality_requirement: "South Korean nationals only, age 19+"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows:
+    - "Every Thursday 00:00-11:00 KST (정기점검/scheduled maintenance) — testing prohibited during this window"
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - www.nexon.com
+    - myinfo.nexon.com
+    - accountweb-bff-api.nexon.com
+    - nxlogin.nexon.com
+    - login.nexon.com
+    - sso.nexon.com
+    - join.nexon.com
+    - session.nexon.com
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope:
+    - "Any domain not in the 8 listed above"
+    - "Payment / identity-verification third-party providers"
+    - "Third-party SDKs"
+    - "External SNS integrations: Discord, Instagram, Facebook, YouTube"
+    - "Third-party auth providers: Facebook, Google, Naver, Apple, Steam, Xbox, PlayStation login"
+    - "Other users as attack targets"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false
+  scanner_allowed: false   # explicitly prohibited AND excluded as a finding source
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "Manual testing only. '무차별 자동화 공격/스캐닝' explicitly banned as a testing method, separate from being excluded as a finding source."
+
+accounts:
+  test_account_required: unknown   # policy does not mention a sandbox/test account process; implies production accounts
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true   # "DoS/DDoS, 시스템 파괴, 데이터 삭제/변조"
+  brute_force: true   # explicitly named, incl. OTP/2FA bypass attempts
+  credential_stuffing: true
+  social_engineering: true
+  physical_attack: true
+  third_party_testing: true
+  personal_data_access: true
+  destructive_actions: true   # "시스템 파괴, 데이터 삭제/변조"
+  persistence: true
+  mass_content_creation: true
+  malware: true
+  other:
+    - "DLL hijacking prohibited"
+    - "No attacks against other users' accounts"
+    - "No exploitation of third-party auth/SNS integrations"
+
+excluded_findings:
+  - "Findings requiring extensive preconditions"
+  - "CSRF on generic/low-impact functions (e.g. logout, bookmarking)"
+  - "Non-reproducible or no-PoC reports"
+  - "Duplicates"
+  - "Already publicly known vulnerabilities"
+  - "DoS"
+  - "Open redirect"
+  - "Rate-limit policy gaps alone"
+  - "Self-only impact"
+  - "Mass content creation vulnerabilities"
+  - "Non-technical / social attacks reported without a technical exploitation path"
+  - "Policy criticism without a working exploit"
+  - "TLS/protocol version issues"
+  - "Missing security headers (CSP/X-Frame-Options/HttpOnly, etc.)"
+  - "Email auth config gaps (SPF/DMARC/DKIM)"
+  - "OSS version disclosure without a working PoC"
+  - "MITM-dependent findings"
+  - "Findings requiring extreme user interaction"
+  - "Email enumeration"
+  - "Legacy-browser-only issues"
+  - "Vulnerabilities in third-party apps/integrations"
+  - "Negligible-impact findings"
+  - "SSL/DNS config issues found via crawling"
+  - "Findings requiring disabled browser security settings"
+  - "Game-cheat reports"
+  - "Cloud/infrastructure configuration reports"
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr). Company contact: bugbounty@nexon.co.kr."
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Service/product name"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120   # +60 day mutual extension possible
+  disclosure_requires_approval: true   # disclosure venue: KISA KNVD DB
+
+privacy:
+  stop_on_personal_data: true   # note: fork research read Nexon's phrasing as slightly softer ("mask and continue") vs NCSoft's explicit "stop immediately" wording — applying the project's stricter-rule-wins principle, treat Nexon the same as NCSoft: STOP IMMEDIATELY on any personal-data/credit-info/trade-secret access, then mask/delete
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true
+
+uncertainties:
+  - "Exact wording of Nexon's personal-data clause reads slightly less strict than NCSoft's ('mask if unavoidable' vs. NCSoft's 'stop immediately') — re-verify the exact source text directly before relying on this distinction; this file currently applies the strictest interpretation as a safety default."
+  - "No test-account or sandbox environment is described — assume production is the only environment and budget for that risk accordingly."
+  - "No explicit request-rate/concurrency limit published."
+
+evidence:
+  field_sources:
+    scope: "https://cs.nexon.com/helpBoard/popuphelpview/33900 (research fork, accessed 2026-07-18) — 8 domains listed exhaustively"
+    blackout_windows: "same source — weekly Thursday 00:00-11:00 KST maintenance window"
+    excluded_findings: "same source — full exclusion list"
+    reporting: "same source + https://hacker.findthegap.co.kr"

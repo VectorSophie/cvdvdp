@@ -1,0 +1,97 @@
+name: 취약점 신고·조치·공개제도(CVD/VDP) 시범사업 (KISA CVD/VDP Pilot Program)
+policy_version: unknown  # cvdvdp.kr does not publish a program-level version number; per-org VDP docs are versioned individually (see policies/targets/*.yaml)
+source_urls:
+  - https://cvdvdp.kr/
+retrieved_at: "2026-07-18"
+content_hash: unknown  # cvdvdp.kr is a JS-rendered page; no static hash captured this pass. Re-verify manually before relying on cached dates.
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true   # KISA-provided VPN only, stated identically in every target VDP ("한국인터넷진흥원이 제공하는 VPN을 통해서만 ... 허용")
+  nationality_requirement: "South Korean nationals only (대한민국 국적자), age 19+ as of application date"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: unknown  # No program-wide blackout found. One secondary source (ZDNet) claims testing is authorized "365 days, 24 hours" with no restricted windows — but this CONFLICTS with Nexon's own VDP, which specifies a weekly Thursday 00:00-11:00 KST maintenance blackout. Target-specific rules override this general claim. Check each policies/targets/*.yaml.
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains: []      # not applicable at program level — scope is defined per target only
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope: []
+  subdomains_implicitly_allowed: false   # NEVER assume subdomains are in scope anywhere in this program; every target VDP enumerates exact hostnames only
+
+automation:
+  passive_collection_allowed: true   # inferred: no target VDP prohibits passive/read-only research; all prohibitions target active attack techniques
+  crawling_allowed: unknown          # not addressed directly; treat as scanner-adjacent and therefore NOT permitted by default (see scanner_allowed)
+  scanner_allowed: false             # every one of the 7 researched targets either explicitly bans automated scanning/fuzzing as a testing method, lists it as an excluded/invalid finding category, or both
+  fuzzing_allowed: false
+  max_requests_per_second: unknown  # NEEDS_CLARIFICATION — no target publishes a rate limit; default to slow, manual, single-request-at-a-time pacing
+  max_concurrency: unknown          # NEEDS_CLARIFICATION — same as above; treat as 1 until a target explicitly states otherwise
+  notes: "Program-wide posture is MANUAL TESTING ONLY. All 7 researched targets independently prohibit or invalidate automated-scanner/fuzzer findings. Do not build or run active automation against any target under this program without an explicit, target-specific written permission that does not currently exist."
+
+accounts:
+  test_account_required: true
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: "LG U+ FAQ requires registering the test account using the researcher's OWN real identity (no throwaway/synthetic identity), and requires the tag '[정보보안점검팀] 보안점검 중입니다.' in the title and body of any post/comment created during testing so staff can distinguish test activity from real user activity. Treat this as the strictest common practice and apply it to any target that involves account/content creation unless that target's own VDP says otherwise."
+
+prohibited:
+  dos: true
+  brute_force: true
+  credential_stuffing: true
+  social_engineering: true       # explicitly named in every target VDP: "피싱, 보이스 피싱 등의 사회공학적 방법"
+  physical_attack: true
+  third_party_testing: true      # implicit via strict scope enumeration — testing anything not explicitly listed is out of scope/unauthorized
+  personal_data_access: true     # not "prohibited to encounter" but MUST stop immediately, mask, delete, and notify the company the moment personal data/credit info/trade secrets are accessed
+  destructive_actions: true      # "훼손, 멸실, 변경 또는 위조" (damage, destruction, alteration, or falsification) explicitly banned
+  persistence: true              # implied: malware install/propagation banned, and using discovered access beyond PoC is treated as violating the granted "접근권한" (access authorization) entirely
+  mass_content_creation: true    # LG U+ VDP lists "게시물, 댓글, 메시지 대량 반복 작성 가능한 취약점" as an excluded finding category, and this project's own non-negotiable principles ban mass content creation as a testing technique regardless
+  malware: true
+  other:
+    - "No monetary demands related to reporting/disclosure unless the org runs a separate registered bug-bounty program"
+    - "No reporting a found vulnerability to any third party other than the company and KISA; no using it for private benefit"
+    - "No reverse-engineering of in-scope software/apps for any purpose other than the vulnerability search itself"
+    - "Testing without having completed program registration/onboarding is explicitly excluded as invalid (Samsung Life FAQ item: '시범사업에 참가 신청을 하지 않고 발굴한 취약점')"
+
+excluded_findings: []   # program-level list not applicable; see each target file — lists are target-specific though heavily overlapping
+
+conditional_findings: []
+
+reporting:
+  channel: "Private companies -> KISA FindTheGap portal (https://hacker.findthegap.co.kr) — non-members must register an account first. Public institutions -> email hackthegov@ncsc.go.kr (per program overview research; not independently re-verified against a public-institution VDP in this pass)."
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12   # "망에 침입한 때" (the moment a vulnerability attack succeeds and network intrusion occurs) — stop discovery activity immediately, report within 12h
+  required_fields:
+    - "Reporter name, phone number, email"
+    - "Service or product name where the vulnerability was found"
+    - "Date/time of discovery"
+    - "Proof of Concept (PoC)"
+    - "Exploitation scenario"
+    - "Network intrusion timestamp, if applicable"
+  disclosure_wait_days: 120   # company must patch within 120 days of KISA sharing the report; researcher may disclose only after that (or after company's own earlier notice)
+  disclosure_requires_approval: true   # researcher must reach agreement with the company before disclosing; company may request up to a further 60-day extension with stated reason
+
+privacy:
+  stop_on_personal_data: true    # uniform across all 7 targets: immediately stop testing and notify the company on encountering personal data, credit information, or trade secrets
+  masking_required: true         # any unavoidable screenshot must be mosaic/masked and deleted immediately after reporting
+  delete_after_reporting: true
+  special_contract_priority: "Where the per-org VDP and the personal-data-processing-delegation contract conflict: the CONTRACT governs privacy/personal-data matters, the VDP governs everything else (stated identically in LG U+ and Samsung Life text; assume same for all targets pending individual confirmation)."
+
+uncertainties:
+  - "No program-level KISA VPN client/verification mechanism is documented on any public page — presumably provided directly to approved participants outside the public web. CLI/process must not assume VPN state; require explicit user attestation before any test session."
+  - "Program-level secondary source (ZDNet) claims 24/7 testing with no blackout windows; this directly conflicts with Nexon's own VDP (weekly Thursday 00:00-11:00 KST blackout). Resolved by precedence rule: target-specific VDP text always overrides general program-level claims."
+  - "No explicit 'emergency reporting deadline after ACTUAL intrusion' distinct from the standard per-target 12h network-intrusion SLA was found at the program level — the 12h figure IS the emergency deadline, confirmed at the per-target level for LG U+ and Samsung Life specifically."
+  - "No universal request-rate or concurrency limit is published anywhere. Treat as zero automated throughput allowed; manual, human-paced requests only."
+
+evidence:
+  field_sources:
+    schedule: "https://cvdvdp.kr/ (accessed 2026-07-18); corroborated verbatim in LG U+ and Samsung Life VDP pages, each stating '2026년 6월 29일부터 2026년 7월 24일까지' policy validity and '2026년 6월 29일부터 2026년 7월 21일까지' discovery window"
+    eligibility: "https://cvdvdp.kr/ program registration requirements; corroborated verbatim across LG U+ and Samsung Life VDP section 1"
+    reporting: "https://hacker.findthegap.co.kr/ (referenced from all target VDPs); hackthegov@ncsc.go.kr per program-overview research pass (not independently re-verified against a public-institution VDP)"
+    participants: "https://cvdvdp.kr/ lists 15 confirmed participants: 7 private (LG U+, Nexon, NCSoft, Toss Payments, Samsung Life, EST Security, INCA Internet) matching the user-provided list exactly, plus 8 public institutions (Ministry of Economy and Finance, Ministry of Interior and Safety, Ministry of Land/Infrastructure/Transport, KDCA, HIRA, Korea Transportation Safety Authority, Bank of Korea, KEPCO)"

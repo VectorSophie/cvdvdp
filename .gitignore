@@ -1,0 +1,9 @@
+# Local research data — never commit evidence, sessions, or credentials
+workspace/
+evidence/
+sessions/
+*.env
+.env.*
+*.pem
+*.key
+credentials*

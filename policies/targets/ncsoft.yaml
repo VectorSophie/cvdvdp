@@ -1,0 +1,110 @@
+name: NCSoft (엔씨소프트 / NC)
+policy_version: unknown
+source_urls:
+  - https://www.plaync.com/policy/cvdvdp
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true   # "KISA VPN only"
+  nationality_requirement: "South Korean nationals only, age 19+"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []   # none stated in this VDP (unlike Nexon's Thursday maintenance window — do not assume it applies here)
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - www.nc.com
+    - corporate.nc.com
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope:
+    - "Any URL not one of the 2 listed above — VDP states testing outside listed URLs is prohibited ('명시된 URL 외에 발굴 금지')"
+  subdomains_implicitly_allowed: false
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false
+  scanner_allowed: false
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "Manual testing only; automated scanners/fuzzers prohibited AND excluded as a finding source."
+
+accounts:
+  test_account_required: unknown
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true   # "DDoS/서비스 중단 유발" prohibited
+  brute_force: true
+  credential_stuffing: true
+  social_engineering: true   # "피싱, 보이스 피싱 등"
+  physical_attack: true
+  third_party_testing: true
+  personal_data_access: true
+  destructive_actions: true
+  persistence: true
+  mass_content_creation: unknown   # not explicitly named as prohibited technique here, but excluded-finding list covers related categories; treat as prohibited per program-level default
+  malware: true
+  other: []
+
+excluded_findings:
+  - "Non-reproducible findings"
+  - "Requires excessive user interaction"
+  - "Requires disabled security features"
+  - "No PoC provided"
+  - "Duplicates"
+  - "Prior internal knowledge of the issue"
+  - "Self-XSS"
+  - "Security-policy-only issues, including missing headers"
+  - "TLS/DNS/email config issues"
+  - "CSRF outside of member/admin functions"
+  - "Open redirect / reflected XSS"
+  - "Negligible-impact findings"
+  - "DoS"
+  - "Brute force / fuzzing / automated scanning"
+  - "Information disclosure of error messages, source code, IP addresses, or admin page existence"
+  - "Previously disclosed 0-days"
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr). Company contact: vdp@ncsoft.com / 02-6201-0554. KISA: cvd@kisa.or.kr / 02-405-6697."
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Name / phone / email"
+    - "Service name"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120   # +60 day extension possible
+  disclosure_requires_approval: true
+
+privacy:
+  stop_on_personal_data: true   # phrasing here is the STRONGEST of all researched targets: "개인정보... 접근 또는 열람하였을 때는... 취약점 발견 활동을 즉시 중단" — immediate cessation is unambiguous
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true
+
+uncertainties:
+  - "No blackout window stated for NCSoft, unlike Nexon's weekly Thursday maintenance window — do not carry Nexon's blackout over to NCSoft without independent confirmation."
+  - "mass_content_creation prohibition not explicitly named in the prohibited-techniques section (only implied via excluded-finding categories) — verify directly if this becomes relevant to a specific test."
+
+evidence:
+  field_sources:
+    scope: "https://www.plaync.com/policy/cvdvdp (research fork, accessed 2026-07-18) — exactly 2 domains listed"
+    excluded_findings: "same source — 16-item exclusion list"
+    privacy: "same source — personal-data clause, strongest 'immediate cessation' wording among all 7 targets"
+    reporting: "same source + https://hacker.findthegap.co.kr"

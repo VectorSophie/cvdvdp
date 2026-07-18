@@ -1,0 +1,133 @@
+name: Samsung Life Insurance (삼성생명보험주식회사)
+policy_version: "1.0"
+source_urls:
+  - https://www.samsunglife.com/individual/display/footer/PDC-MRMAN020100M?tabIndex=1
+retrieved_at: "2026-07-18"
+content_hash: unknown
+
+eligibility:
+  participant_approval_required: true
+  vpn_required: true
+  nationality_requirement: "South Korean nationals only, age 19+ as of application date"
+  minimum_age: 19
+
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []   # none stated
+  timezone: Asia/Seoul
+
+scope:
+  allowed_domains:
+    - www.samsunglife.com
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope:
+    - "Everything not www.samsunglife.com itself — this is the ONLY in-scope asset stated, no other domains/subdomains/apps/APIs listed anywhere in the policy"
+  subdomains_implicitly_allowed: false   # extremely important here: scope is a single bare domain, nothing else
+
+automation:
+  passive_collection_allowed: true
+  crawling_allowed: false
+  scanner_allowed: false   # FAQ exclusion item: "스캐닝 도구를 통해 발견한 취약점"
+  fuzzing_allowed: false
+  max_requests_per_second: unknown
+  max_concurrency: unknown
+  notes: "Manual testing only, single-domain scope. This is a LIFE INSURER — assume any account data encountered may include health/financial/beneficiary information; treat as maximally sensitive personal data."
+
+accounts:
+  test_account_required: unknown
+  multiple_accounts_allowed: unknown
+  account_creation_limits: unknown
+  identity_verification_constraints: unknown
+
+prohibited:
+  dos: true
+  brute_force: unknown   # not explicitly named in the numbered prohibition list, but scanning tools ARE named as an excluded finding category
+  credential_stuffing: unknown
+  social_engineering: true   # "피싱, 보이스 피싱 등"
+  physical_attack: true
+  third_party_testing: true   # scope is a single domain; anything else is unambiguously out of scope
+  personal_data_access: true
+  destructive_actions: true   # "훼손, 멸실, 변경, 또는 위조" prohibited
+  persistence: true
+  mass_content_creation: unknown
+  malware: true
+  other:
+    - "No unauthorized access/intrusion into production systems (servers, network, security equipment) without access rights — explicitly named as an excluded-finding ground, i.e. treated as illegal under 정보통신망법 rather than a rewardable finding"
+    - "No monetary demand outside a formally operated bug-bounty program"
+    - "Testing without prior program registration is explicitly excluded as invalid"
+    - "This is a LIFE INSURER — no unauthorized access to policyholder health/financial/beneficiary data under any circumstance; this project's own personal-data non-negotiable principles apply with extra weight here"
+
+excluded_findings:
+  - "Already reported to the software vendor, or already rewarded via another bug-bounty program"
+  - "Found via unauthorized intrusion into live production systems/servers/network/security equipment in violation of law"
+  - "Denial of Service related"
+  - "Found via scanning tools"
+  - "Already publicly known, or vendor defunct so no security update is possible"
+  - "Requires extreme system manipulation or user intervention to trigger"
+  - "Found without having registered for the pilot program"
+  - "MITM"
+  - "Self-XSS or reflected XSS"
+  - "DLL(.so) hijacking"
+  - "Side-channel or hardware attacks"
+  - "HSTS not applied"
+  - "Insecure SSL/TLS cipher configuration"
+  - "Runtime exploitation via FRIDA, Xposed, or similar tools"
+  - "Session/cookie expiration issues"
+  - "Simple client-side JavaScript execution"
+  - "Low-risk CSRF"
+  - "Phishing (incl. social engineering) or URL-redirect-based findings"
+  - "No PoC implemented or exact PoC not provided (all reproduction prerequisites)"
+  - "False, exaggerated, or unclear reports where the vulnerability can't be identified"
+  - "Simple 'bypass' of OS-tamper detection (root/jailbreak detection)"
+  - "Simple 'bypass' of detection/prevention of tools like FRIDA or VPN"
+  - "Only appears with developer mode enabled"
+  - "Only occurs on rooted/jailbroken devices or emulators"
+  - "SSL pinning not applied"
+  - "Location data alone, not combined with personal information"
+  - "Only theoretical, does not manifest in the real environment"
+  - "Very minor potential damage"
+  - "Very low impact, not worth exploiting"
+  - "Simple feature misuse"
+  - "Simple stopping/bypassing of a security program's function"
+  - "Depends on the underlying OS/framework's own (un)patched state, or requires manipulating that underlying layer"
+  - "Mobile deep-link vulnerabilities"
+  - "Requires installing another mobile app/software to manifest"
+  - "Same vulnerability (same attack vector/technique) reported multiple times across different entry points"
+  - "Submitted with tampered/falsified consent information"
+
+conditional_findings: []
+
+reporting:
+  channel: "KISA FindTheGap (https://hacker.findthegap.co.kr). Company contact: 02-751-8448 / itsecurity.manager@samsung.com. KISA: cvd@kisa.or.kr / 02-405-6697."
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+  required_fields:
+    - "Name / phone / email"
+    - "Service or product name"
+    - "Discovery timestamp"
+    - "PoC"
+    - "Exploitation scenario"
+    - "Network intrusion timestamp (if applicable)"
+  disclosure_wait_days: 120
+  disclosure_requires_approval: true
+
+privacy:
+  stop_on_personal_data: true
+  masking_required: true
+  delete_after_reporting: true
+  special_contract_priority: true   # identical wording to LG U+: contract governs privacy conflicts, VDP governs everything else
+
+uncertainties:
+  - "Scope is unusually narrow (a single bare domain, no subdomains, no app, no API) for a major financial institution — this is almost certainly deliberate given the sensitivity of insurance/health data, but worth a sanity check against the live page before testing in case the scope was updated after 2026-07-18."
+  - "brute_force/credential_stuffing not independently named in the numbered prohibition list (only 8 items, matching LG U+'s and NCSoft's structure) — still banned under this project's own non-negotiable principles regardless."
+
+evidence:
+  field_sources:
+    scope: "https://www.samsunglife.com/individual/display/footer/PDC-MRMAN020100M?tabIndex=1, rendered page text captured 2026-07-18 via browser (page is a Vue.js SPA; plain HTTP fetch/curl returns only an empty app shell)"
+    excluded_findings: "same source, FAQ section 12(1), 34-item list — the longest exclusion list of all 7 researched targets"
+    reporting: "same source, sections 4 and 10"
+    privacy: "same source, sections 7(3) and 8(3)"
