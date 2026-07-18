@@ -101,6 +101,20 @@ Stdlib `unittest`, fixtures are mock policy YAMLs under `tests/fixtures/` — ne
 
 **Explicitly not tested, because the capability doesn't exist:** scanner/automation blocking, request-budget enforcement, "dry-run sends no requests" as a runtime check (no live mode exists to compare against — the equivalent guarantee is a static assertion that no networking import exists anywhere in `cvd/`).
 
+## G. HAR analysis (`har_analysis.py`) — added 2026-07-19
+
+Added instead of a Research Planner (skipped — the Phase 1 checklists already serve as the test-plan artifact for this cycle; a second, auto-generated artifact from the same source data isn't worth building yet) and instead of any autonomous scanning capability (explicitly declined — every one of the 7 researched targets bans automated scanning/fuzzing outright and invalidates findings from it; running one would strip the safe-harbor protection each target's own VDP conditions on strict compliance).
+
+`cvd analyze-har <target> <har-file.har>`
+
+- Parses a HAR file the researcher exported from their own browser session (pure file parsing, stdlib `json` — HAR is JSON). No network capability added to the package.
+- Extracts every request URL logged in the HAR and runs each through the identical scope-matching logic from `scope_guard.py` (same function, not a reimplementation) — reuses steps 4–5 (hostname exact-match, path-prefix match, explicit-out-of-scope check).
+- Output: a summary table of ALLOWED / DENIED / NEEDS_CLARIFICATION per unique URL, with a count, not a per-request dump.
+- For any DENIED/NEEDS_CLARIFICATION hit, only sanitized metadata is retained in the output/report (host, path, method, timestamp) — request/response headers and bodies from the HAR are never copied into the tool's output, per the master brief's Section 2.C instruction to discard or minimally-sanitize out-of-scope traffic observed in a session.
+- This is a retroactive safety net for real browser-based manual testing (the shape we already committed to in Section C — pre-check, not a proxy): run it after a testing session to confirm nothing accidentally left scope, rather than trusting memory alone.
+
+Tests: fixture HAR files (synthetic, not real captured traffic) with a mix of in-scope and out-of-scope requests per target; assert the sanitization rule holds (no header/body content in output for out-of-scope hits).
+
 ## Open items carried forward as uncertainties
 
 - VPN attestation expiry is hardcoded at 4 hours by default — no config surface for this in v1; revisit if it proves wrong in practice.
