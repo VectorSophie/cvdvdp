@@ -35,9 +35,14 @@ def compute_hash(data: dict) -> str:
 
 def _write_hash_line(path: pathlib.Path, new_hash: str) -> None:
     text = path.read_text(encoding="utf-8")
-    updated = re.sub(
+    updated, count = re.subn(
         r"^content_hash:.*$", f"content_hash: {new_hash}", text, count=1, flags=re.MULTILINE
     )
+    if count == 0:
+        # Key doesn't exist; append it with trailing newline
+        if not text.endswith('\n'):
+            text += '\n'
+        updated = text + f"content_hash: {new_hash}\n"
     path.write_text(updated, encoding="utf-8")
 
 

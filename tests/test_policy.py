@@ -64,6 +64,35 @@ class TestContentHash(unittest.TestCase):
         result = policy.validate_content_hash(self.tmp)
         self.assertEqual(result, "stale")
 
+    def test_validate_backfills_missing_key_and_converges_to_ok(self):
+        """Test that files with no content_hash key at all are backfilled and converge to ok."""
+        tmp = FIXTURES.parent / "_tmp_no_hash_key.yaml"
+        try:
+            tmp.write_text("name: NoHashField\nfoo: bar\n")
+            result1 = policy.validate_content_hash(tmp)
+            self.assertEqual(result1, "backfilled")
+            # Verify the key was actually written
+            text = tmp.read_text()
+            self.assertIn("content_hash:", text)
+            # Call again to verify it now converges to ok
+            result2 = policy.validate_content_hash(tmp)
+            self.assertEqual(result2, "ok")
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+
+    def test_validate_comment_preservation(self):
+        """Test that inline comments survive backfill."""
+        tmp = FIXTURES.parent / "_tmp_with_comment.yaml"
+        try:
+            tmp.write_text("name: Hash Test\ncontent_hash: unknown\nfoo: bar  # this comment must survive backfill\n")
+            policy.validate_content_hash(tmp)
+            text = tmp.read_text()
+            self.assertIn("# this comment must survive backfill", text)
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+
 
 class TestReviewGate(unittest.TestCase):
     def test_is_reviewed_false_when_never_reviewed(self):
