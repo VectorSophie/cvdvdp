@@ -42,6 +42,46 @@ class TestCheckUrl(unittest.TestCase):
         result = scope_guard.check_url(self.app_only, "https://anything.example.com")
         self.assertEqual(result.verdict, "NOT_APPLICABLE")
 
+    def test_denied_url_path_boundary_enforcement_no_trailing_slash(self):
+        # Regression: allowed_urls entry WITHOUT trailing slash before * must still enforce boundary
+        # Entry: "gateway.example.com/payments/v4*" (no slash before *)
+        # Should allow v4/charge but deny v4-evil/charge
+        from cvd.policy import Policy
+        policy_obj = Policy(
+            program={},
+            target={
+                "scope": {
+                    "allowed_domains": [],
+                    "allowed_urls": ["gateway.example.com/payments/v4*"],
+                    "explicit_out_of_scope": [],
+                    "allowed_apis": [],
+                    "allowed_apps": [],
+                }
+            },
+        )
+        # Should allow valid path
+        result = scope_guard.check_url(policy_obj, "https://gateway.example.com/payments/v4/charge")
+        self.assertEqual(result.verdict, "ALLOWED")
+
+        # Should deny boundary violation (v4-evil, not v4/)
+        result = scope_guard.check_url(policy_obj, "https://gateway.example.com/payments/v4-evil/charge")
+        self.assertEqual(result.verdict, "DENIED")
+
+    def test_denied_substring_host_not_matched(self):
+        # "login.example.com" in scope; "evil-login.example.com" must NOT match (not a real subdomain)
+        result = scope_guard.check_url(self.full, "https://evil-login.example.com/auth")
+        self.assertEqual(result.verdict, "DENIED")
+
+    def test_denied_hostname_truncation_suffix_injection(self):
+        # "login.example.com" in scope; "login.example.com.evil.net" must NOT match
+        result = scope_guard.check_url(self.full, "https://login.example.com.evil.net/auth")
+        self.assertEqual(result.verdict, "DENIED")
+
+    def test_allowed_uppercase_hostname(self):
+        # urllib.parse.urlparse lowercases hostnames; "LOGIN.EXAMPLE.COM" should match "login.example.com"
+        result = scope_guard.check_url(self.full, "https://LOGIN.EXAMPLE.COM/auth")
+        self.assertEqual(result.verdict, "ALLOWED")
+
 
 class TestEvaluate(unittest.TestCase):
     def setUp(self):
@@ -99,3 +139,17 @@ class TestEvaluate(unittest.TestCase):
             )
             self.assertEqual(result.verdict, "DENIED")
             self.assertIn("Redirect", result.reason)
+
+    def test_denied_when_schedule_missing(self):
+        # Policy with missing schedule should fail closed
+        from cvd.policy import Policy
+        with tempfile.TemporaryDirectory() as d:
+            workspace_dir = pathlib.Path(d)
+            now = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)
+            gates.write_attestation(workspace_dir, now)
+            malformed_policy = Policy(program={}, target={"scope": {}})
+            result = scope_guard.evaluate(
+                malformed_policy, workspace_dir, "https://example.com", now, reviewed=True
+            )
+            self.assertEqual(result.verdict, "DENIED")
+            self.assertIn("schedule", result.reason)

@@ -2,6 +2,25 @@ import urllib.parse
 from . import gates
 
 
+def _prefix_matches_with_boundary(text: str, prefix: str) -> bool:
+    """Check if text matches prefix, enforcing path-separator boundary.
+
+    A prefix match is valid if:
+    - text starts with prefix, AND
+    - prefix ends with "/" (already boundary-safe), OR
+    - text == prefix exactly, OR
+    - the character immediately after prefix in text is "/"
+
+    This prevents "gateway.example.com/payments/v4" from matching
+    "gateway.example.com/payments/v4-evil/charge".
+    """
+    if not text.startswith(prefix):
+        return False
+    if prefix.endswith("/") or text == prefix:
+        return True
+    return text[len(prefix):].startswith("/")
+
+
 class ScopeResult:
     def __init__(self, verdict: str, reason: str):
         self.verdict = verdict
@@ -31,7 +50,7 @@ def check_url(policy_obj, url: str) -> ScopeResult:
     host_and_path = f"{hostname}{parsed.path}"
 
     for pattern in out_of_scope:
-        if hostname == pattern or host_and_path.startswith(pattern):
+        if hostname == pattern or _prefix_matches_with_boundary(host_and_path, pattern):
             return ScopeResult("DENIED", f"Matches explicit_out_of_scope entry: {pattern!r}")
 
     if hostname in allowed_domains:
@@ -39,7 +58,7 @@ def check_url(policy_obj, url: str) -> ScopeResult:
 
     for entry in allowed_urls:
         prefix = entry[:-1] if entry.endswith("*") else entry
-        if host_and_path.startswith(prefix):
+        if _prefix_matches_with_boundary(host_and_path, prefix):
             return ScopeResult("ALLOWED", f"URL matches scope.allowed_urls entry: {entry!r}")
 
     return ScopeResult(
@@ -53,6 +72,9 @@ def evaluate(policy_obj, workspace_dir, url: str, now, reviewed: bool, redirect_
         return ScopeResult("DENIED", "Policy has not been reviewed yet. Run: cvd review-policy <target>")
 
     schedule = policy_obj.get("schedule")
+    if not schedule or not isinstance(schedule, dict):
+        return ScopeResult("DENIED", "Policy schedule is missing or malformed; contact policy owner")
+
     if not gates.is_within_testing_window(schedule, now.date()):
         return ScopeResult(
             "DENIED",
