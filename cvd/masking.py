@@ -1,11 +1,11 @@
 import re
 
 PATTERNS = [
-    ("cookie_header", re.compile(r"(?i)cookie:\s*\S+")),
+    ("cookie_header", re.compile(r"(?i)cookie:.*")),
     ("auth_bearer", re.compile(r"(?i)(authorization:\s*)?bearer\s+[a-z0-9._~+/=-]+")),
     ("email", re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")),
     ("phone_kr", re.compile(r"01[016789]-?\d{3,4}-?\d{4}")),
-    ("rrn_kr", re.compile(r"\d{6}-?[1-4]\d{6}")),
+    ("rrn_kr", re.compile(r"\b\d{6}-?[1-4]\d{6}\b")),
     ("high_entropy_token", re.compile(r"\b[A-Za-z0-9_-]{32,}\b")),
 ]
 

@@ -12,6 +12,11 @@ class TestMasking(unittest.TestCase):
         out = masking.redact("Cookie: session=abc123xyz; other=1")
         self.assertNotIn("session=abc123xyz", out)
 
+    def test_redacts_multivalue_cookie_header(self):
+        out = masking.redact("Cookie: session=abc123; token=SUPERSECRETKEY99")
+        self.assertNotIn("SUPERSECRETKEY99", out)
+        self.assertIn("[REDACTED:cookie_header]", out)
+
     def test_redacts_bearer_token(self):
         out = masking.redact("Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
         self.assertNotIn("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", out)
