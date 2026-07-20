@@ -75,13 +75,17 @@ def evaluate(policy_obj, workspace_dir, url: str, now, reviewed: bool, redirect_
     if not schedule or not isinstance(schedule, dict):
         return ScopeResult("DENIED", "Policy schedule is missing or malformed; contact policy owner")
 
-    if not gates.is_within_testing_window(schedule, now.date()):
-        return ScopeResult(
-            "DENIED",
-            f"Outside authorized testing window {schedule['testing_start']}..{schedule['testing_end']}",
-        )
-    if gates.is_in_blackout(schedule, now):
-        return ScopeResult("DENIED", "Currently inside a blackout window for this target")
+    try:
+        if not gates.is_within_testing_window(schedule, now.date()):
+            return ScopeResult(
+                "DENIED",
+                f"Outside authorized testing window {schedule['testing_start']}..{schedule['testing_end']}",
+            )
+        if gates.is_in_blackout(schedule, now):
+            return ScopeResult("DENIED", "Currently inside a blackout window for this target")
+    except (KeyError, ValueError):
+        return ScopeResult("DENIED", "Schedule is missing required fields or contains an invalid date; contact policy owner")
+
     if not gates.is_vpn_attested(workspace_dir, now):
         return ScopeResult(
             "DENIED", "VPN not attested this session (or attestation expired). Run: cvd attest-vpn <target>"

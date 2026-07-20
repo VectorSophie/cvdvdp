@@ -153,3 +153,43 @@ class TestEvaluate(unittest.TestCase):
             )
             self.assertEqual(result.verdict, "DENIED")
             self.assertIn("schedule", result.reason)
+
+    def test_denied_when_schedule_incomplete(self):
+        # Policy with schedule dict present but missing required keys should fail closed
+        from cvd.policy import Policy
+        with tempfile.TemporaryDirectory() as d:
+            workspace_dir = pathlib.Path(d)
+            now = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)
+            gates.write_attestation(workspace_dir, now)
+            # Schedule present but missing testing_start/testing_end
+            malformed_policy = Policy(program={}, target={"schedule": {"blackout_windows": []}, "scope": {}})
+            result = scope_guard.evaluate(
+                malformed_policy, workspace_dir, "https://example.com", now, reviewed=True
+            )
+            self.assertEqual(result.verdict, "DENIED")
+            self.assertIn("required fields", result.reason)
+
+    def test_denied_when_schedule_has_malformed_date(self):
+        # Policy with schedule containing invalid date strings should fail closed
+        from cvd.policy import Policy
+        with tempfile.TemporaryDirectory() as d:
+            workspace_dir = pathlib.Path(d)
+            now = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)
+            gates.write_attestation(workspace_dir, now)
+            # Schedule with malformed date string
+            malformed_policy = Policy(
+                program={},
+                target={
+                    "schedule": {
+                        "testing_start": "not-a-date",
+                        "testing_end": "2026-07-21",
+                        "blackout_windows": [],
+                    },
+                    "scope": {},
+                },
+            )
+            result = scope_guard.evaluate(
+                malformed_policy, workspace_dir, "https://example.com", now, reviewed=True
+            )
+            self.assertEqual(result.verdict, "DENIED")
+            self.assertIn("invalid date", result.reason)
