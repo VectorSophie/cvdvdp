@@ -5,6 +5,14 @@ from . import scope_guard
 
 
 def extract_urls(har_path: pathlib.Path) -> list:
+    """
+    Extract all request URLs from a HAR file.
+
+    Returns raw, unsanitized URLs including query strings and fragments.
+    WARNING: These URLs may contain sensitive data (tokens, session IDs, etc).
+    Do NOT expose directly to CLI output, logs, or reports. Callers must
+    sanitize using _sanitize() or use analyze() which handles this internally.
+    """
     data = json.loads(har_path.read_text(encoding="utf-8"))
     urls = []
     for entry in data.get("log", {}).get("entries", []):
@@ -25,12 +33,14 @@ def analyze(policy_obj, har_path: pathlib.Path) -> dict:
     results = []
     for url in unique_urls:
         result = scope_guard.check_url(policy_obj, url)
-        results.append((url, result))
+        # sanitize immediately so no downstream code can accidentally echo a raw URL with query params/tokens
+        sanitized_url = _sanitize(url)
+        results.append((sanitized_url, result))
 
     flagged = []
-    for url, result in results:
+    for sanitized_url, result in results:
         if result.verdict != "ALLOWED":
-            flagged.append({"url_sanitized": _sanitize(url), "verdict": result.verdict, "reason": result.reason})
+            flagged.append({"url_sanitized": sanitized_url, "verdict": result.verdict, "reason": result.reason})
 
     return {
         "total_unique_requests": len(unique_urls),
