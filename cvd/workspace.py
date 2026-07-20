@@ -62,8 +62,8 @@ def session_log(session_path: pathlib.Path, note: str, test_id: str = None) -> b
     flagged = masking.contains_sensitive(note)
     entry = {"note": masking.redact(note)}
     if test_id:
-        entry["test_id"] = test_id
-        data["test_ids"].append(test_id)
+        entry["test_id"] = masking.redact(test_id)
+        data["test_ids"].append(masking.redact(test_id))
     data["notes"].append(entry)
     data["requests"] += 1
     session_path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")

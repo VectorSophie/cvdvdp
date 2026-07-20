@@ -70,6 +70,16 @@ class TestSessionRecorder(unittest.TestCase):
             data = yaml.safe_load(session_path.read_text())
             self.assertNotIn("researcher@example.com", data["notes"][0]["note"])
 
+    def test_session_log_masks_sensitive_test_id(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = pathlib.Path(d)
+            target_dir, now = self._target_dir(base)
+            session_path = workspace.session_start(target_dir, "demo", "hash123", True, now)
+            workspace.session_log(session_path, "some note", test_id="test_researcher@example.com")
+            data = yaml.safe_load(session_path.read_text())
+            self.assertNotIn("researcher@example.com", data["notes"][0]["test_id"])
+            self.assertNotIn("researcher@example.com", data["test_ids"][0])
+
     def test_session_stop_standard_deadline(self):
         with tempfile.TemporaryDirectory() as d:
             base = pathlib.Path(d)
@@ -86,6 +96,15 @@ class TestSessionRecorder(unittest.TestCase):
             session_path = workspace.session_start(target_dir, "demo", "hash123", True, now)
             result = workspace.session_stop(session_path, "unexpected network intrusion", now, intrusion=True)
             self.assertEqual(result["reporting_deadline_hours"], 12)
+
+    def test_session_stop_masks_sensitive_reason(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = pathlib.Path(d)
+            target_dir, now = self._target_dir(base)
+            session_path = workspace.session_start(target_dir, "demo", "hash123", True, now)
+            workspace.session_stop(session_path, "stopped after seeing researcher@example.com in the response", now)
+            data = yaml.safe_load(session_path.read_text())
+            self.assertNotIn("researcher@example.com", data["stop_reason"])
 
     def test_find_open_session_returns_open_one(self):
         with tempfile.TemporaryDirectory() as d:
