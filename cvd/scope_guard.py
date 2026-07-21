@@ -86,11 +86,11 @@ def evaluate(policy_obj, workspace_dir, url: str, now, reviewed: bool, redirect_
     except (KeyError, ValueError):
         return ScopeResult("DENIED", "Schedule is missing required fields or contains an invalid date; contact policy owner")
 
-    if not gates.is_vpn_attested(workspace_dir, now):
-        return ScopeResult(
-            "DENIED", "VPN not attested this session (or attestation expired). Run: cvd attest-vpn <target>"
-        )
-
+    # Deliberately no VPN-attestation check here: scope-check sends no traffic of its
+    # own (it's a local classification of a URL string against policy data) and is
+    # meant to be run for planning purposes before VPN is even connected. VPN
+    # attestation is enforced instead at the point actual testing activity begins
+    # (cli.cmd_session_start), not at this pure scope/schedule validation step.
     result = check_url(policy_obj, url)
     if result.verdict == "ALLOWED" and redirect_target:
         redirect_result = check_url(policy_obj, redirect_target)

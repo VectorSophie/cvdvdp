@@ -106,6 +106,12 @@ def cmd_workspace_init(args, now):
 def cmd_session_start(args, now):
     target_dir = pathlib.Path("workspace") / args.target
     vpn_ok = gates.is_vpn_attested(target_dir, now)
+    if not vpn_ok:
+        print(
+            "Refusing to start a testing session: VPN not attested this session "
+            "(or attestation expired). Run: cvd attest-vpn <target>"
+        )
+        return 1
     content_hash = _current_content_hash(args.target)
     session_path = workspace.session_start(target_dir, args.target, content_hash, vpn_ok, now)
     workspace.append_audit(target_dir, "session-start", {}, now)

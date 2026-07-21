@@ -112,13 +112,16 @@ class TestEvaluate(unittest.TestCase):
             self.assertEqual(result.verdict, "DENIED")
             self.assertIn("blackout", result.reason)
 
-    def test_denied_when_vpn_not_attested(self):
+    def test_allowed_without_vpn_attestation(self):
+        # scope-check is a local, offline classification of a URL string against
+        # policy data — it sends no traffic of its own, so it must not require VPN
+        # attestation. VPN is enforced instead at cli.cmd_session_start, the point
+        # actual testing activity begins.
         with tempfile.TemporaryDirectory() as d:
             workspace_dir = pathlib.Path(d)
-            now = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)
+            now = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)  # Sunday, not blackout
             result = scope_guard.evaluate(self.full, workspace_dir, "https://login.example.com", now, reviewed=True)
-            self.assertEqual(result.verdict, "DENIED")
-            self.assertIn("VPN", result.reason)
+            self.assertEqual(result.verdict, "ALLOWED")
 
     def test_allowed_when_all_gates_pass_and_in_scope(self):
         with tempfile.TemporaryDirectory() as d:

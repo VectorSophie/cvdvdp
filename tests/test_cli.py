@@ -75,6 +75,26 @@ class TestCliSmoke(CliTestBase):
         code = cli.main(["session-stop", "demo", "--reason", "done for today"], now=FIXED_NOW)
         self.assertEqual(code, 0)
 
+    def test_session_start_blocked_without_vpn_attestation(self):
+        cli.main(["workspace-init", "demo"], now=FIXED_NOW)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = cli.main(["session-start", "demo"], now=FIXED_NOW)
+        self.assertEqual(code, 1)
+        self.assertIn("VPN", buf.getvalue())
+        self.assertFalse(list(pathlib.Path("workspace/demo/sessions").glob("*.yaml")))
+
+    def test_scope_check_allowed_without_vpn_attestation(self):
+        # scope-check is local/offline planning, not live testing — must work
+        # even before VPN is connected.
+        with mock.patch("builtins.input", return_value="y"):
+            cli.main(["review-policy", "demo"], now=FIXED_NOW)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = cli.main(["scope-check", "demo", "https://login.example.com"], now=FIXED_NOW)
+        self.assertEqual(code, 0)
+        self.assertIn("ALLOWED", buf.getvalue())
+
     def test_analyze_har_reports_denied_count(self):
         shutil.copy(FIXTURES / "sample.har", "sample.har")
         buf = io.StringIO()
