@@ -3,7 +3,7 @@ policy_version: unknown
 source_urls:
   - https://www.plaync.com/policy/cvdvdp
 retrieved_at: "2026-07-18"
-content_hash: unknown
+content_hash: 67e8fab8828f55f4c1ef0c5c72ace2d6de199c859a3fb47e37ccec42dbb733ae
 
 eligibility:
   participant_approval_required: true

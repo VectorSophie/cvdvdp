@@ -3,7 +3,7 @@ policy_version: "1.0"
 source_urls:
   - https://www.samsunglife.com/individual/display/footer/PDC-MRMAN020100M?tabIndex=1
 retrieved_at: "2026-07-18"
-content_hash: unknown
+content_hash: 72b1308c4ab3b4bc13d09f6b69e20d3d8bce08d475dd49c041005b7312ede8f3
 
 eligibility:
   participant_approval_required: true

@@ -12,6 +12,7 @@ from unittest import mock
 from cvd import cli, gates
 
 FIXTURES = pathlib.Path(__file__).parent / "fixtures"
+REAL_POLICIES = pathlib.Path(__file__).parent.parent / "policies" / "targets"
 FIXED_NOW = datetime.datetime(2026, 7, 19, 9, 0, tzinfo=gates.KST)  # Sunday, within window, no blackout
 
 
@@ -21,8 +22,13 @@ class CliTestBase(unittest.TestCase):
         self.tmp = tempfile.mkdtemp()
         os.chdir(self.tmp)
         os.makedirs("policies/targets", exist_ok=True)
+        os.makedirs("templates", exist_ok=True)
         shutil.copy(FIXTURES / "program.yaml", "policies/program.yaml")
         shutil.copy(FIXTURES / "target_full.yaml", "policies/targets/demo.yaml")
+        shutil.copy(
+            pathlib.Path(__file__).parent.parent / "templates" / "report-template.md",
+            "templates/report-template.md",
+        )
 
     def tearDown(self):
         os.chdir(self._old_cwd)
@@ -102,3 +108,48 @@ class TestCliSmoke(CliTestBase):
             code = cli.main(["analyze-har", "demo", "sample.har"], now=FIXED_NOW)
         self.assertEqual(code, 1)  # sample.har contains 2 denied requests
         self.assertIn("Denied: 2", buf.getvalue())
+
+    def test_generate_test_plan_for_real_target(self):
+        shutil.copy(REAL_POLICIES / "nexon.yaml", "policies/targets/nexon.yaml")
+        code = cli.main(["generate-test-plan", "nexon"], now=FIXED_NOW)
+        self.assertEqual(code, 0)
+        generated = list(pathlib.Path("workspace/nexon/test-plans").glob("*.yaml"))
+        self.assertGreater(len(generated), 0)
+
+    def test_generate_test_plan_unknown_target_returns_error(self):
+        code = cli.main(["generate-test-plan", "demo"], now=FIXED_NOW)
+        self.assertEqual(code, 1)
+
+    def test_dry_run_allowed_and_clean(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = cli.main(
+                ["dry-run", "demo", "https://login.example.com", "manually check IDOR on profile"],
+                now=FIXED_NOW,
+            )
+        self.assertEqual(code, 0)
+        self.assertIn("DRY RUN", buf.getvalue())
+
+    def test_dry_run_flags_prohibited_description(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = cli.main(
+                ["dry-run", "demo", "https://login.example.com", "run a brute force credential stuffing attack"],
+                now=FIXED_NOW,
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("brute_force", buf.getvalue())
+
+    def test_new_report_scaffolds_file(self):
+        code = cli.main(["new-report", "demo", "Example IDOR finding"], now=FIXED_NOW)
+        self.assertEqual(code, 0)
+        files = list(pathlib.Path("workspace/demo/reports").glob("*.md"))
+        self.assertEqual(len(files), 1)
+        self.assertIn("Example IDOR finding", files[0].read_text())
+
+    def test_validate_all_reports_per_target_status(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = cli.main(["validate-all"], now=FIXED_NOW)
+        self.assertEqual(code, 0)
+        self.assertIn("demo:", buf.getvalue())

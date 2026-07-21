@@ -3,7 +3,7 @@ policy_version: "1.1"
 source_urls:
   - https://pages.tosspayments.com/terms/homepage/vulnerability-disclosure
 retrieved_at: "2026-07-18"
-content_hash: unknown
+content_hash: 410293cdd0ae68b9d51243271ec70e557875b16970050ab06607013fdf568d2e
 
 eligibility:
   participant_approval_required: true

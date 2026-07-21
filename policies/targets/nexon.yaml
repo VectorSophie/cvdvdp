@@ -3,7 +3,7 @@ policy_version: unknown   # version number not captured; re-check page for a doc
 source_urls:
   - https://cs.nexon.com/helpBoard/popuphelpview/33900
 retrieved_at: "2026-07-18"
-content_hash: unknown
+content_hash: f93c1d40d6a13c58fbf99c62c2e8bfe07a6c0120eaff9ebf392dede8addbe2dc
 
 eligibility:
   participant_approval_required: true

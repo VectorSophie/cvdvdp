@@ -3,7 +3,9 @@ import datetime
 import pathlib
 import sys
 
-from . import policy, gates, scope_guard, workspace, har_analysis
+import yaml
+
+from . import policy, gates, scope_guard, workspace, har_analysis, dry_run, test_plan, report_scaffold
 
 PROGRAM_POLICY_PATH = pathlib.Path("policies/program.yaml")
 BASE_DIR = pathlib.Path(".")
@@ -161,6 +163,64 @@ def cmd_analyze_har(args, now):
     return 0 if summary["denied"] == 0 and summary["needs_clarification"] == 0 else 1
 
 
+def cmd_generate_test_plan(args, now):
+    p = _load(args.target)
+    entries = test_plan.generate(args.target, p)
+    if not entries:
+        print(f"No documented hypotheses for {args.target!r} — nothing generated.")
+        return 1
+    plans_dir = pathlib.Path("workspace") / args.target / "test-plans"
+    plans_dir.mkdir(parents=True, exist_ok=True)
+    for entry in entries:
+        out_path = plans_dir / f"{entry['id']}.yaml"
+        out_path.write_text(yaml.safe_dump(entry, sort_keys=False), encoding="utf-8")
+    print(f"Generated {len(entries)} test-plan entries for {args.target} under {plans_dir}")
+    return 0
+
+
+def cmd_dry_run(args, now):
+    p = _load(args.target)
+    result = dry_run.preview(p, args.url, args.description, request_count=args.count)
+    print(f"Scope: {result['scope_verdict']} — {result['scope_reason']}")
+    if result["prohibited_flags"]:
+        print("PROHIBITED-ACTION FLAGS:")
+        for flag in result["prohibited_flags"]:
+            print(f"  - {flag['flag']}: {flag['reason']}")
+    else:
+        print("No prohibited-action keywords matched.")
+    print(result["rate_note"])
+    print(result["vpn_boundary_note"])
+    clean = result["scope_verdict"] == "ALLOWED" and not result["prohibited_flags"]
+    return 0 if clean else 1
+
+
+def cmd_new_report(args, now):
+    p = _load(args.target)
+    reports_dir = pathlib.Path("workspace") / args.target / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    template_path = pathlib.Path("templates/report-template.md")
+    content = report_scaffold.scaffold(args.target, args.title, p, template_path)
+    safe_title = "".join(c if c.isalnum() else "-" for c in args.title.lower()).strip("-")[:50]
+    out_path = reports_dir / f"{safe_title or 'report'}.md"
+    out_path.write_text(content, encoding="utf-8")
+    print(f"Report scaffold written to {out_path}")
+    return 0
+
+
+def cmd_validate_all(args, now):
+    targets_dir = pathlib.Path("policies/targets")
+    required_keys = ("name", "schedule", "scope", "prohibited", "reporting", "privacy")
+    all_ok = True
+    for target_path in sorted(targets_dir.glob("*.yaml")):
+        status = policy.validate_content_hash(target_path)
+        data = policy.load_yaml(target_path)
+        missing = [k for k in required_keys if k not in data]
+        ok = status != "stale" and not missing
+        all_ok = all_ok and ok
+        print(f"{target_path.stem}: {status}, missing_keys={missing or 'none'} [{'OK' if ok else 'ISSUE'}]")
+    return 0 if all_ok else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cvd")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -211,6 +271,25 @@ def build_parser() -> argparse.ArgumentParser:
     p10.add_argument("target")
     p10.add_argument("har_file")
     p10.set_defaults(func=cmd_analyze_har)
+
+    p11 = sub.add_parser("generate-test-plan")
+    p11.add_argument("target")
+    p11.set_defaults(func=cmd_generate_test_plan)
+
+    p12 = sub.add_parser("dry-run")
+    p12.add_argument("target")
+    p12.add_argument("url")
+    p12.add_argument("description", help="Free-text description of the planned action, e.g. 'check IDOR on profile endpoint'")
+    p12.add_argument("--count", type=int, default=1, help="Planned request count (for rate/scale estimation)")
+    p12.set_defaults(func=cmd_dry_run)
+
+    p13 = sub.add_parser("new-report")
+    p13.add_argument("target")
+    p13.add_argument("title")
+    p13.set_defaults(func=cmd_new_report)
+
+    p14 = sub.add_parser("validate-all")
+    p14.set_defaults(func=cmd_validate_all)
 
     return parser
 

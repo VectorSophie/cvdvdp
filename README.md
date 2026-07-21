@@ -24,4 +24,13 @@ python -m cvd session-stop nexon --reason "finished planned checks"
 python -m cvd analyze-har nexon path/to/exported.har   # retroactive check on a browser session you already ran
 ```
 
-This tool never sends a network request itself (no HTTP client dependency exists anywhere in `cvd/` — verified by `tests/test_no_networking_import.py`). `scope-check` and `analyze-har` are pre/post-checks you run around testing you do yourself in a browser or other tool.
+Offline planning tools — all work without VPN, before you've even started a session:
+
+```bash
+python -m cvd validate-all                                          # content-hash + required-key check across all 7 targets
+python -m cvd dry-run nexon https://sso.nexon.com/foo "check session binding"   # scope + prohibited-action check + rate estimate, sends nothing
+python -m cvd generate-test-plan nexon                               # structured test-plan YAML from documented hypotheses, under workspace/nexon/test-plans/
+python -m cvd new-report nexon "Session fixation on SSO"             # scaffolds a report file from templates/report-template.md
+```
+
+This tool never sends a network request itself (no HTTP client dependency exists anywhere in `cvd/` — verified by `tests/test_no_networking_import.py`). `scope-check`, `dry-run`, and `analyze-har` are pre/post-checks you run around testing you do yourself in a browser or other tool. See `docs/VPN-REQUIRED-ACTIONS.md` for exactly which actions do and don't require VPN.

@@ -22,3 +22,25 @@ scope:
   explicit_out_of_scope:
     - "internal.example.com"
   subdomains_implicitly_allowed: false
+
+prohibited:
+  dos: true
+  brute_force: true
+  social_engineering: true
+  physical_attack: true
+  malware: true
+  mass_content_creation: true
+  destructive_actions: true
+
+automation:
+  scanner_allowed: false
+  fuzzing_allowed: false
+
+reporting:
+  channel: "Test FindTheGap portal"
+  discovery_deadline_hours: 72
+  intrusion_deadline_hours: 12
+
+privacy:
+  stop_on_personal_data: true
+  masking_required: true

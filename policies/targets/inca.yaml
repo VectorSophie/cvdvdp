@@ -3,7 +3,7 @@ policy_version: "1.1"
 source_urls:
   - https://nprotect.com/kr/vdp/vdp.html
 retrieved_at: "2026-07-18"
-content_hash: unknown
+content_hash: 8b0214cda53d9b2a8f1a576cb949eb8aa1e530936fd4fd805b9e8a315f7ed149
 
 eligibility:
   participant_approval_required: true

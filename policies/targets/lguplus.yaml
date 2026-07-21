@@ -3,7 +3,7 @@ policy_version: "1.0"
 source_urls:
   - https://privacy.lguplus.com/privacy/cvdvdp/v1
 retrieved_at: "2026-07-18"
-content_hash: unknown  # capture a hash of the saved page text on next verification pass
+content_hash: 7a6093d8a11db35d41dce7ec09fbb29c36584be16fa85c5b1a307f85a4e0db30
 
 eligibility:
   participant_approval_required: true

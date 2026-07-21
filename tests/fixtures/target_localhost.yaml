@@ -1,0 +1,16 @@
+name: Test Target Localhost Mock
+content_hash: unknown
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows: []
+  timezone: Asia/Seoul
+scope:
+  allowed_domains:
+    - localhost
+  allowed_urls: []
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope: []
+  subdomains_implicitly_allowed: false
