@@ -2,6 +2,7 @@
 workspace/
 evidence/
 sessions/
+.review-state/
 *.env
 .env.*
 *.pem

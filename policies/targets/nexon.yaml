@@ -16,7 +16,12 @@ schedule:
   testing_end: "2026-07-21"
   reporting_end: "2026-07-24"
   blackout_windows:
-    - "Every Thursday 00:00-11:00 KST (정기점검/scheduled maintenance) — testing prohibited during this window"
+    - type: weekly
+      day: Thursday
+      start: "00:00"
+      end: "11:00"
+      timezone: Asia/Seoul
+      notes: "정기점검/scheduled maintenance — testing prohibited during this window"
   timezone: Asia/Seoul
 
 scope:

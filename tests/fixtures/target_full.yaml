@@ -1,0 +1,24 @@
+name: Test Target Full
+content_hash: unknown
+schedule:
+  testing_start: "2026-06-29"
+  testing_end: "2026-07-21"
+  reporting_end: "2026-07-24"
+  blackout_windows:
+    - type: weekly
+      day: Thursday
+      start: "00:00"
+      end: "11:00"
+      timezone: Asia/Seoul
+  timezone: Asia/Seoul
+scope:
+  allowed_domains:
+    - login.example.com
+    - api.example.com
+  allowed_urls:
+    - "gateway.example.com/payments/v4/*"
+  allowed_apis: []
+  allowed_apps: []
+  explicit_out_of_scope:
+    - "internal.example.com"
+  subdomains_implicitly_allowed: false
