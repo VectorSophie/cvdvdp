@@ -8,3 +8,4 @@ sessions/
 *.pem
 *.key
 credentials*
+__pycache__/
